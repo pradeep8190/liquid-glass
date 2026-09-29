@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquid Glass Optical Refraction & Hydrodynamic Fluid Physics Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+    <div class="demo-stage" id="demoStage">
+        <canvas id="demoCanvas"></canvas>
+        <!-- Tab Bar SVG Icons Source -->
+        <div id="tabIcons" style="display: none;">
+            <svg id="svg-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <svg id="svg-cart" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1.5"></circle><circle cx="20" cy="21" r="1.5"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <svg id="svg-explore" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <svg id="svg-save" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+            <svg id="svg-profile" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
+    </div>
+
+    <div class="bottom-panel">
+        <!-- Real-Time Physics Telemetry HUD -->
+        <div class="telemetry-hud">
+            <div class="hud-stat">
+                <span class="hud-label">Velocity ($v_x$)</span>
+                <span class="hud-value" id="valVelocity">0.0 <span class="hud-unit">px/s</span></span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-stat">
+                <span class="hud-label">Stretch ($S_x$)</span>
+                <span class="hud-value" id="valStretch">1.000<span class="hud-unit">×</span></span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-stat">
+                <span class="hud-label">Thinning ($S_y$)</span>
+                <span class="hud-value" id="valThinning">1.000<span class="hud-unit">×</span></span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-stat">
+                <span class="hud-label">Hydraulic Splash</span>
+                <span class="hud-value" id="valSplash">0.00 <span class="hud-unit">px</span></span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-stat">
+                <span class="hud-label">Refraction Mode</span>
+                <span class="hud-value" style="color: #2563eb;">Full 3D Snell</span>
+            </div>
+        </div>
+
+        <!-- Live Tuning Controls -->
+        <div class="controls-bar">
+            <div class="control-item">
+                <label>Refraction Index ($IOR$):</label>
+                <input type="range" id="ctrlIor" min="1.05" max="1.8" step="0.01" value="1.46">
+                <span id="txtIor">1.46</span>
+            </div>
+            <div class="control-item">
+                <label>Dispersion:</label>
+                <input type="range" id="ctrlDisp" min="0.00" max="1.00" step="0.01" value="0.25">
+                <span id="txtDisp">0.25</span>
+            </div>
+            <div class="control-item">
+                <label>Border Attraction:</label>
+                <input type="range" id="ctrlAttract" min="0.0" max="1.50" step="0.05" value="0.75">
+                <span id="txtAttract">0.75</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
