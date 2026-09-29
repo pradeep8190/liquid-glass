@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid Glass Theme Switch — Pure WebGL Optics</title>
+  <link rel="stylesheet" href="theme-change-style.css">
+</head>
+<body>
+
+  <!-- Fullscreen WebGL Canvas for GPU Optical Refraction -->
+  <canvas id="glcanvas"></canvas>
+
+
+
+  <!-- Subtle Floating Hint -->
+  <div class="interactive-hint">
+    <span>Click switch to toggle Light & Dark mode • Real-time Snell's Law liquid optics</span>
+  </div>
+
+
+
+  <!-- Offscreen 2D Canvas for crisp dynamic background rendering -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Dedicated Modular Scripts -->
+  <script src="theme-change-shaders.js"></script>
+  <script src="theme-change-app.js"></script>
+</body>
+</html>

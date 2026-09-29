@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid Glass Plasma Toggle Button</title>
+  <link rel="stylesheet" href="toggle-style.css">
+</head>
+<body>
+
+  <div class="showcase-container">
+    <!-- Studio Grid Stage -->
+    <div class="studio-stage" id="studioStage">
+      
+      <!-- Studio Grid Ambient Background Layer -->
+      <div class="studio-grid"></div>
+
+      <!-- WebGL Optical Canvas (Renders Capsule SDF, Snell Refraction, Volumetric Plasma Smoke) -->
+      <canvas id="glcanvas"></canvas>
+
+      <!-- Offscreen Background & Text Rasterizer Canvas -->
+      <canvas id="bgCanvas"></canvas>
+
+      <!-- Interactive Glass Capsule Touch & Click Overlay -->
+      <div class="capsule-interactive-overlay" id="capsuleOverlay" role="switch" aria-checked="true" tabindex="0" title="Click to Toggle Liquid Glass Plasma">
+        <span class="sr-only">Toggle Switch</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modular Scripts in Execution Order -->
+  <script src="toggle-shaders.js"></script>
+  <script src="toggle-plasma.js"></script>
+  <script src="toggle-app.js"></script>
+</body>
+</html>

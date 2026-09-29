@@ -1,0 +1,145 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body,
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #cfd3d8;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+  color: #1a1b1f;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body.dark-theme {
+  background-color: #1c1d22;
+  color: #f1f3f9;
+}
+
+/* Fullscreen WebGL Canvas */
+#glcanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* Header & Controls Navigation Bar */
+.top-nav {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.nav-left,
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #2b2d35;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+}
+
+body.dark-theme .btn-pill {
+  background: rgba(36, 38, 46, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: #e2e4ec;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.btn-pill:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-theme .btn-pill:hover {
+  background: rgba(48, 52, 64, 0.8);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
+}
+
+.btn-pill.active {
+  background: rgba(255, 255, 255, 0.85);
+  color: #000;
+}
+
+body.dark-theme .btn-pill.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.tag-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+body.dark-theme .tag-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Center Interactive Instruction Hint */
+.interactive-hint {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.42);
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  z-index: 10;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+}
+
+body.dark-theme .interactive-hint {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Offscreen dynamic 2D canvas */
+#bgCanvas {
+  display: none;
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid Glass Search Bar — Apple Optical Physics</title>
+  <link rel="stylesheet" href="search-style.css">
+</head>
+<body>
+
+  <div class="showcase-container">
+    <!-- Studio Card Frame with Precision Glass Canvas -->
+    <div class="studio-card-wrapper" id="cardWrapper">
+      <div class="stage-container" id="stageContainer">
+        <!-- GPU Optical Shader Canvas (Renders the Liquid Glass Pill) -->
+        <canvas id="glcanvas"></canvas>
+
+        <!-- Dynamic 2D Background Rasterizer -->
+        <canvas id="bgCanvas"></canvas>
+
+        <!-- Composited Search Bar Interactive UI -->
+        <div class="search-ui-container" id="searchUIContainer">
+          <div class="search-bar-frame" id="searchBarFrame">
+            <!-- Search Glass Optical Icon -->
+            <div class="search-icon-wrapper">
+              <svg class="search-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7.5"></circle>
+                <line x1="21" y1="21" x2="16.5" y2="16.5"></line>
+              </svg>
+            </div>
+
+            <!-- Native Interactive Text Input -->
+            <input 
+              type="text" 
+              class="search-input" 
+              id="searchInput" 
+              placeholder='Search "backdrop, components..."' 
+              autocomplete="off" 
+              spellcheck="false"
+            />
+
+            <!-- Interactive Action Badges -->
+            <div class="search-actions">
+              <!-- Clear Button (Shown when typing) -->
+              <button class="clear-btn" id="clearBtn" type="button" aria-label="Clear Search Input">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+
+              <!-- Keyboard Shortcut Tag -->
+              <span class="shortcut-badge" id="shortcutBadge">⌘K</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Touch Overlay for Background Interaction -->
+        <div class="touch-overlay" id="touchOverlay"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modular Scripts -->
+  <script src="search-shaders.js"></script>
+  <script src="search-app.js"></script>
+</body>
+</html>

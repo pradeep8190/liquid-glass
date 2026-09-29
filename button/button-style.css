@@ -1,0 +1,242 @@
+/* ==========================================================================
+   Liquid Glass Button Component — Stylesheet
+   Pure Studio Canvas, Engineering Grid, and Scalable Card Frame
+   ========================================================================== */
+
+:root {
+  --canvas-bg: #dfe2e8;
+  --card-bg: #edf0f5;
+  --card-border: rgba(255, 255, 255, 0.85);
+  --card-shadow: 
+    0 24px 60px -12px rgba(28, 32, 45, 0.08),
+    0 1px 3px rgba(28, 32, 45, 0.04);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--canvas-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Outer Showcase Container */
+.showcase-container {
+  width: 100%;
+  max-width: 980px;
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Studio Card Frame with Signature Deep Bottom-Left Curved Corner */
+.studio-card-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 780px;
+  height: 480px;
+  border-radius: 44px 44px 44px 104px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  border: 1.5px solid var(--card-border);
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+}
+
+/* Stage & Overlay */
+.stage-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+}
+
+#glcanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 2;
+  pointer-events: none;
+}
+
+#bgCanvas {
+  display: none;
+}
+
+.touch-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  cursor: default;
+}
+
+.touch-overlay.hovering-button {
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Glass Card Action Menu — Apple VisionOS Fluid Kinematics
+   ========================================================================== */
+.card-actions-menu {
+  position: absolute;
+  left: 39px;
+  bottom: 39px;
+  width: 195px;
+  height: 275px;
+  padding: 16px 12px 74px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 5px;
+  pointer-events: none;
+  z-index: 7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+}
+
+.card-actions-menu.open .card-action-btn,
+.card-actions-menu.open .card-close-anchor {
+  pointer-events: auto;
+}
+
+/* Dedicated Close Anchor (Covers bottom-left X button exactly) */
+.card-close-anchor {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  pointer-events: none;
+  cursor: pointer;
+  z-index: 8;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fluid Optical Hover Glider (Continuous liquid track) */
+.hover-glider {
+  position: absolute;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.48);
+  border: 0.75px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 4px 14px -2px rgba(28, 32, 45, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.97);
+  transition: 
+    top 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    left 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    width 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.18s ease,
+    transform 0.20s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+}
+
+.hover-glider.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Staggered Liquid Bloom & Blur-to-Focus Dissolve */
+.card-action-btn {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: rgba(90, 79, 79, 0.50);
+  font-size: 13px;
+  font-weight: 590;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  opacity: 0;
+  transform: translateY(14px) scale(0.92);
+  filter: blur(5px);
+  transition: 
+    opacity 0.18s ease-in,
+    transform 0.20s ease-in,
+    filter 0.18s ease-in,
+    color 0.18s ease;
+}
+
+.card-actions-menu.open .card-action-btn {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0px);
+  transition: 
+    opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.44s cubic-bezier(0.175, 0.885, 0.32, 1.15),
+    filter 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.18s ease;
+  transition-delay: calc(var(--item-idx, 0) * 36ms + 70ms);
+}
+
+/* Hover: Deep Razor-Sharp Ink Tone */
+.card-action-btn:hover {
+  color: rgba(22, 18, 18, 0.96);
+}
+
+/* Active: High-Damping Haptic Compression */
+.card-action-btn:active,
+.card-action-btn.clicked {
+  transform: scale(0.94) !important;
+  color: #000000;
+  transition: transform 0.08s ease, color 0.08s ease !important;
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke: rgba(90, 79, 79, 0.50);
+  transition: 
+    stroke 0.20s ease,
+    transform 0.26s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+}
+
+.card-action-btn:hover .action-icon {
+  stroke: rgba(20, 16, 16, 0.98);
+  transform: scale(1.14) rotate(-3deg);
+}
+
+.card-action-btn:active .action-icon,
+.card-action-btn.clicked .action-icon {
+  stroke: #000000;
+  transform: scale(0.92);
+}
+
+.action-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid Glass Slider — Pure WebGL Optics</title>
+  <link rel="stylesheet" href="slider-style.css">
+</head>
+<body>
+
+  <!-- Background Ambience & Container -->
+  <div class="slider-showcase">
+    <header class="header">
+      <h1 class="title">Liquid Glass Slider</h1>
+      <p class="subtitle">Real-time Snell's Law refraction • Split meniscus caustics • 6-band chromatic dispersion</p>
+    </header>
+
+    <!-- Interactive Canvas & Slider Mount -->
+    <div class="slider-stage" id="sliderStage">
+      <!-- Fullscreen / Stage WebGL Canvas for GPU Optical Refraction -->
+      <canvas id="glcanvas"></canvas>
+
+      <!-- Offscreen 2D Canvas for High-DPR Crisp Dynamic Track Rasterization -->
+      <canvas id="bgCanvas"></canvas>
+
+      <!-- Glass Slider Control Overlay for Drag Interaction -->
+      <div class="slider-overlay" id="sliderOverlay" tabindex="0" role="slider" aria-label="Liquid Glass Slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"></div>
+    </div>
+
+    <!-- Direct Value Readout -->
+    <div class="slider-controls">
+      <div class="readout-card">
+        <span class="readout-label">SLIDER VALUE</span>
+        <span class="readout-value" id="valueReadout">72%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Modular Scripts with Cache-Busting -->
+  <script src="slider-shaders.js?v=1.2.3"></script>
+  <script src="slider-app.js?v=1.2.3"></script>
+</body>
+</html>
