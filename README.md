@@ -20,6 +20,7 @@
 | **[Search Bar](./search-bar)** | Fluid search capsule with optical glass refraction and background magnification. | WebGL Shaders, Vanilla JS |
 | **[Slider](./slider)** | Viscous fluid slider thumb with liquid meniscus and spring damping physics. | WebGL, Canvas, Math Spring |
 | **[Theme Change](./theme-change)** | Fluid distortion wave transition for dark/light mode switching. | Fullscreen GLSL Quad |
+| **[Black Glass Nav](./black_glass_nav)** | Dark tinted liquid glass navigation dock with refractive lens pill and smooth kinematics. | WebGL, GLSL Shaders, Spring Physics |
 | **[Toggle](./toggle)** | Plasma-infused liquid toggle switch with tactile viscous drag and organic snap. | GLSL Plasma, Spring Physics |
 
 ---

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Standalone Liquid Glass Lens Component</title>
+  <style>
+    body, html { 
+      margin: 0; 
+      padding: 0; 
+      overflow: hidden; 
+      background-color: #e5e9f0; 
+    }
+    canvas { 
+      display: block; 
+      width: 100vw; 
+      height: 100vh; 
+      touch-action: none; 
+    }
+    #bgCanvas { 
+      display: none; 
+    }
+    .hint {
+      position: absolute;
+      top: 30px;
+      width: 100%;
+      text-align: center;
+      font-family: -apple-system, sans-serif;
+      font-weight: 500;
+      color: rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">Move your mouse to interact with the Liquid Glass Lens</div>
+  <canvas id="glcanvas"></canvas>
+  
+  <!-- Offscreen texture canvas -->
+  <canvas id="bgCanvas"></canvas>
+
+  <script>
+    // --- 1. Physical Configuration & State ---
+    const config = {
+      // Dimensions of the lens (Squircle)
+      thumbHalfWidth: 67,
+      thumbHalfHeight: 63,
+      thumbRadius: 44,
+      
+      // Optics
+      ior: 1.25,
+      dispersion: 0.006,
+      lensHeight: 34.0
+    };
+
+    const state = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      
+      // Positional physics
+      thumbX: window.innerWidth / 2,
+      thumbY: window.innerHeight / 2,
+      targetX: window.innerWidth / 2,
+      targetY: window.innerHeight / 2,
+      velX: 0,
+      velY: 0,
+      
+      // Mass Conservation Jelly physics
+      scaleX: 1.0,
+      scaleY: 1.0,
+      scaleVelX: 0
+    };
+
+    // --- 2. GLSL Shaders ---
+    const vsSource = `
+      attribute vec2 a_position;
+      varying vec2 v_uv;
+      void main() {
+        v_uv = (a_position + 1.0) * 0.5;
+        gl_Position = vec4(a_position, 0.0, 1.0);
+      }
+    `;
+
+    const fsSource = `
+      precision highp float;
+      varying vec2 v_uv;
+      
+      uniform sampler2D u_background;
+      uniform vec2 u_resolution;
+      uniform vec2 u_thumbPos;
+      uniform vec2 u_thumbHalfSize;
+      uniform float u_thumbRadius;
+      
+      uniform float u_ior;
+      uniform float u_dispersion;
+      uniform float u_lensHeight;
+      uniform vec2 u_scale;
+
+      // Exact 2D Signed Distance Field for Rounded Box (Squircle)
+      float sdRoundedBox(vec2 p, vec2 b, float r) {
+        vec2 q = abs(p) - b + vec2(r);
+        return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+      }
+
+      // Wavelength dispersion weights
+      vec3 getSpectralWeight(int i) {
+        if (i == 0) return vec3(0.40, 0.00, 0.00); // Red
+        if (i == 1) return vec3(0.35, 0.26, 0.00); // Amber
+        if (i == 2) return vec3(0.00, 0.40, 0.04); // Green
+        if (i == 3) return vec3(0.00, 0.26, 0.28); // Cyan
+        if (i == 4) return vec3(0.04, 0.08, 0.40); // Blue
+        return vec3(0.21, 0.00, 0.28);              // Violet
+      }
+
+      void main() {
+        vec2 pixelCoord = v_uv * u_resolution;
+        vec2 p = pixelCoord - u_thumbPos;
+        vec2 pDistorted = p / u_scale; // Squash & stretch physics
+        float dpr = u_thumbHalfSize.y / 63.0;
+
+        // SDF Distance to the perimeter of the lens
+        float d = sdRoundedBox(pDistorted, u_thumbHalfSize, u_thumbRadius);
+
+        // --- OUTSIDE THE LENS ---
+        if (d > 0.0) {
+          float shadowAlpha = exp(-d / 18.0) * 0.18;
+          vec3 bg = texture2D(u_background, v_uv).rgb;
+          gl_FragColor = vec4(bg * (1.0 - shadowAlpha), 1.0); // Ambient contact shadow
+          return;
+        }
+
+        // --- INSIDE THE LENS ---
+        float distInside = -d;
+        vec2 pCSS = pDistorted / dpr;
+        float bevelWidth = 48.0 * dpr;
+        float surfaceHeight = u_lensHeight;
+        vec3 normal = vec3(0.0, 0.0, 1.0);
+
+        // Calculate 3D dome curvature based on SDF
+        if (distInside < bevelWidth) {
+          float t = clamp(distInside / bevelWidth, 0.0, 1.0);
+          float smoothT = smoothstep(0.0, 1.0, t);
+          float curve = sqrt(max(0.0, 1.0 - (1.0 - smoothT) * (1.0 - smoothT)));
+          surfaceHeight = curve * u_lensHeight;
+
+          vec2 eps = vec2(1.0, 0.0);
+          float dX = sdRoundedBox(pDistorted + eps.xy, u_thumbHalfSize, u_thumbRadius) - sdRoundedBox(pDistorted - eps.xy, u_thumbHalfSize, u_thumbRadius);
+          float dY = sdRoundedBox(pDistorted + eps.yx, u_thumbHalfSize, u_thumbRadius) - sdRoundedBox(pDistorted - eps.yx, u_thumbHalfSize, u_thumbRadius);
+          vec2 sdfGrad = normalize(vec2(dX, dY) + 1e-6);
+
+          float safeT = min(smoothT, 0.98);
+          float slope = (1.0 - safeT) / sqrt(max(0.001, 1.0 - (1.0 - safeT) * (1.0 - safeT)));
+          slope = slope * (u_lensHeight / bevelWidth) * (1.0 - smoothT);
+          normal = normalize(vec3(-sdfGrad * min(slope, 4.5), 1.0));
+        }
+
+        vec3 incident = vec3(0.0, 0.0, -1.0);
+        vec3 viewDir = vec3(0.0, 0.0, 1.0);
+        float depth = surfaceHeight + 28.0 * dpr;
+
+        // Snell's Law Chromatic Refraction
+        vec3 totalRefracted = vec3(0.0);
+        for (int i = 0; i < 6; i++) {
+          float fi = (float(i) - 2.5) / 2.5;
+          float lambdaIOR = u_ior + fi * u_dispersion;
+          vec3 refr = refract(incident, normal, 1.0 / lambdaIOR);
+          vec2 offset = (refr.xy / abs(refr.z)) * (depth / u_resolution);
+          totalRefracted += texture2D(u_background, v_uv - offset).rgb * getSpectralWeight(i);
+        }
+
+        // Add dark tint for the liquid
+        totalRefracted *= vec3(0.85, 0.85, 0.88);
+
+        // Glossy Specular Highlights & Fresnel
+        vec3 bottomLightDir = normalize(vec3(0.0, -0.85, 0.45));
+        vec3 bottomHalfVec = normalize(bottomLightDir + viewDir);
+        float bottomSpecArea = (1.0 - smoothstep(-52.0, -18.0, pCSS.y)) * (1.0 - smoothstep(16.0, 52.0, abs(pCSS.x)));
+        float specBottom = pow(max(0.0, dot(normal, bottomHalfVec)), 28.0) * 0.38 * bottomSpecArea;
+
+        float NdotV = max(0.0, dot(normal, viewDir));
+        float fresnel = pow(1.0 - NdotV, 3.2);
+        
+        // Restrict white border to only an arc shape on the top
+        float topArcMask = smoothstep(10.0, 45.0, pCSS.y); 
+        vec3 rimLight = vec3(0.95, 0.98, 1.0) * (fresnel * 0.8 + 0.2) * exp(-distInside / (1.5 * dpr)) * 0.60 * topArcMask;
+
+        gl_FragColor = vec4(totalRefracted + specBottom + rimLight, 1.0);
+      }
+    `;
+
+    // --- 3. WebGL Initialization ---
+    const canvas = document.getElementById('glcanvas');
+    const gl = canvas.getContext('webgl', { alpha: false, antialias: true });
+
+    function compileShader(type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error('Shader compile failed:', gl.getShaderInfoLog(shader));
+      }
+      return shader;
+    }
+
+    const program = gl.createProgram();
+    gl.attachShader(program, compileShader(gl.VERTEX_SHADER, vsSource));
+    gl.attachShader(program, compileShader(gl.FRAGMENT_SHADER, fsSource));
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    // Screen Quad
+    const posBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+    const aPosLoc = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(aPosLoc);
+    gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const uResLoc = gl.getUniformLocation(program, 'u_resolution');
+    const uThumbPosLoc = gl.getUniformLocation(program, 'u_thumbPos');
+    const uThumbHalfLoc = gl.getUniformLocation(program, 'u_thumbHalfSize');
+    const uThumbRadLoc = gl.getUniformLocation(program, 'u_thumbRadius');
+    const uIorLoc = gl.getUniformLocation(program, 'u_ior');
+    const uDispLoc = gl.getUniformLocation(program, 'u_dispersion');
+    const uLensHLoc = gl.getUniformLocation(program, 'u_lensHeight');
+    const uScaleLoc = gl.getUniformLocation(program, 'u_scale');
+
+    // Create texture
+    const bgTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, bgTexture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+    // --- 4. 2D Background Canvas ---
+    // We draw a grid to an offscreen canvas to test the refraction optics
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d', { alpha: false });
+
+    function drawBackground() {
+      bgCanvas.width = state.width * state.dpr;
+      bgCanvas.height = state.height * state.dpr;
+      bgCtx.scale(state.dpr, state.dpr);
+
+      // Radial background
+      const grad = bgCtx.createRadialGradient(state.width/2, state.height/2, 50, state.width/2, state.height/2, state.width * 0.8);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(1, '#e2e5ec');
+      bgCtx.fillStyle = grad;
+      bgCtx.fillRect(0, 0, state.width, state.height);
+
+      // Draw a colorful testing grid to make refraction obvious
+      bgCtx.lineWidth = 2;
+      for (let i = 0; i < state.width; i += 60) {
+        bgCtx.strokeStyle = `hsla(${(i / state.width) * 360}, 70%, 65%, 0.5)`;
+        bgCtx.beginPath(); bgCtx.moveTo(i, 0); bgCtx.lineTo(i, state.height); bgCtx.stroke();
+      }
+      for (let i = 0; i < state.height; i += 60) {
+        bgCtx.strokeStyle = `hsla(${(i / state.height) * 360}, 70%, 65%, 0.5)`;
+        bgCtx.beginPath(); bgCtx.moveTo(0, i); bgCtx.lineTo(state.width, i); bgCtx.stroke();
+      }
+      
+      // Upload to WebGL texture
+      gl.bindTexture(gl.TEXTURE_2D, bgTexture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bgCanvas);
+    }
+
+    // --- 5. Event Listeners ---
+    function onResize() {
+      state.width = window.innerWidth;
+      state.height = window.innerHeight;
+      state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      
+      canvas.width = state.width * state.dpr;
+      canvas.height = state.height * state.dpr;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      
+      drawBackground();
+    }
+    window.addEventListener('resize', onResize);
+
+    window.addEventListener('pointermove', (e) => {
+      state.targetX = e.clientX;
+      state.targetY = e.clientY;
+    });
+
+    // --- 6. Render & Physics Loop ---
+    let lastTime = performance.now();
+    function render(time) {
+      const dt = Math.min((time - lastTime) / 1000, 0.1);
+      lastTime = time;
+
+      // Snappy Spring Physics (Lens follows pointer)
+      const distX = state.targetX - state.thumbX;
+      const distY = state.targetY - state.thumbY;
+      
+      state.velX = (state.velX + distX * 400.0 * dt) * 0.85;
+      state.velY = (state.velY + distY * 400.0 * dt) * 0.85;
+      
+      state.thumbX += state.velX * dt;
+      state.thumbY += state.velY * dt;
+
+      // Static Shape (No Jelly Physics)
+      state.scaleX = 1.0;
+      state.scaleY = 1.0;
+
+      // Upload Uniforms
+      gl.uniform2f(uResLoc, canvas.width, canvas.height);
+      gl.uniform2f(uThumbPosLoc, state.thumbX * state.dpr, (state.height - state.thumbY) * state.dpr);
+      gl.uniform2f(uThumbHalfLoc, config.thumbHalfWidth * state.dpr, config.thumbHalfHeight * state.dpr);
+      gl.uniform1f(uThumbRadLoc, config.thumbRadius * state.dpr);
+      gl.uniform1f(uIorLoc, config.ior);
+      gl.uniform1f(uDispLoc, config.dispersion);
+      gl.uniform1f(uLensHLoc, config.lensHeight * state.dpr);
+      gl.uniform2f(uScaleLoc, state.scaleX, state.scaleY);
+
+      // Render Quad
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      requestAnimationFrame(render);
+    }
+
+    // Launch
+    onResize();
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>

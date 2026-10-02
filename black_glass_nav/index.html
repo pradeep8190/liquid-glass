@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquid Glass Navigation Bar — Real-Time WebGL Optics</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Floating Controls -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <div class="brand-badge">
+        <span class="dot"></span>
+        <span>Liquid Glass Optics</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <button id="soundToggle" class="btn-pill active" title="Toggle audio feedback">
+        🔊 Sound On
+      </button>
+    </div>
+  </header>
+
+  <!-- Fullscreen WebGL Canvas for GPU Optical Refraction -->
+  <canvas id="glcanvas"></canvas>
+
+  <!-- Active View Indicator / Card -->
+  <div class="active-view-card">
+    <div id="viewIndicator" class="view-indicator">
+      <span>Active: <strong>Analytics</strong></span> • <span>Live Performance Metrics</span>
+    </div>
+  </div>
+
+  <!-- Interactive Instruction Hint -->
+  <div class="interactive-hint">
+    <span>Click any tab or drag the glass droplet • Use Keys <span class="hint-pill">1</span> <span class="hint-pill">2</span> <span class="hint-pill">3</span> or <span class="hint-pill">←</span> <span class="hint-pill">→</span></span>
+  </div>
+
+  <!-- Offscreen 2D Dynamic Background Texture Canvas -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Modular Scripts -->
+  <script src="shaders.js"></script>
+  <script src="icons.js"></script>
+  <script src="phy.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
